@@ -5,8 +5,9 @@ class Tag(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), nullable=False)
-    store = db.relationship("Store", back_populates="tags")  # ✅ back to 'tags'
-    item = db.relationship("Item", back_populates="tags", secondary="item_tags")
+    store = db.relationship("Store", back_populates="tags")
+
+    # ✅ Rename 'item' to 'items' and match back_populates
+    items = db.relationship("Item", secondary="item_tags", back_populates="tags")
 
