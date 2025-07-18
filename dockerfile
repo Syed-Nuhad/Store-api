@@ -4,11 +4,11 @@ EXPOSE 5000
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir-- --upgrade -r requirements.txt
 
 COPY . .
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=development
 
-CMD ["flask", "run", "--host", "0.0.0.0"]
+CMD ["flask", "run", "--host", "0.0.0.0:80", "app"]
