@@ -25,7 +25,15 @@ class Register(MethodView):
         db.session.add(user)
         db.session.commit()
 
-        return {'message': 'User registered'}, 201
+        # Generate tokens after successful registration
+        access_token = create_access_token(identity=str(user.id), fresh=True)
+        refresh_token = create_refresh_token(identity=str(user.id))
+
+        return {
+            'message': 'User registered',
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }, 201
 
 
 @blp.route("/login")
