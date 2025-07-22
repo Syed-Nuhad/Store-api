@@ -63,3 +63,7 @@ api.register_blueprint(UserBlueprint)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
+
+
+
+# flask db upgrade docker compose up -d docker compose exec web flask db upgrade

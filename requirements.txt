@@ -7,3 +7,4 @@ marshmallow~=4.0.0
 flask-jwt-extended
 passlib
 flask-migrate
+psycopg2
