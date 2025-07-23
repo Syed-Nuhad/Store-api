@@ -47,7 +47,7 @@ class UserSchema(Schema):
     password = fields.String(required=True, load_only=True)
 
 
-class UserRegisterSchema(Schema):
+class UserRegisterSchema(UserSchema):
     email = fields.Email(required=True)
 
 
