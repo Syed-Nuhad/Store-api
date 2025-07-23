@@ -3,29 +3,62 @@ from os import access
 
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, get_jwt, create_refresh_token, jwt_required, get_jwt_identity
 from db import stores, db
-from schemas import UserSchema
+from schemas import UserSchema, UserRegisterSchema
 from models.user import User
 from blocklist import BLOCKLIST
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
 
 
 blp = Blueprint("Users", "users", __name__, description="Operations on users")
+
+
+
+
+def send_welcome_email(to_email, subject, body):
+
+
+    msg = MIMEMultipart()
+    msg["From"] = "nuhad7july0@gmail.com"
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login("nuhad7july0@gmail.com", os.getenv("GMAIL_PASSWORD"))
+        server.sendmail(msg["From"], msg["To"], msg.as_string())
+        server.quit()
+        print("✅ Email sent successfully")
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+
+
+
 @blp.route("/register")
 class Register(MethodView):
-    @blp.arguments(UserSchema)
+    @blp.arguments(UserRegisterSchema)
     def post(self, user_data):
         if User.query.filter(User.username == user_data["username"]).first():
             abort(409, message="Username already exists")
 
-        user = User(user_data["username"], pbkdf2_sha256.hash(user_data["password"]))
+        # Create user
+        user = User(username=user_data["username"], email=user_data["email"], password=pbkdf2_sha256.hash(user_data["password"]))
         db.session.add(user)
         db.session.commit()
 
-        # Generate tokens after successful registration
+        # Send welcome email
+        subject = "🎉 Welcome to the Platform!"
+        body = f"Hi {user.username},\n\nThanks for registering with us. We're glad to have you!"
+        send_welcome_email(user.email, subject, body)  # assuming username is the email
+
+        # Generate tokens
         access_token = create_access_token(identity=str(user.id), fresh=True)
         refresh_token = create_refresh_token(identity=str(user.id))
 
