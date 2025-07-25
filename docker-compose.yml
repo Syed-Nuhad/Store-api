@@ -3,6 +3,6 @@ services:
   web:
     build: .
     ports:
-      - "5080:5080"
+      - "5080:80"
     volumes:
       - .:/app

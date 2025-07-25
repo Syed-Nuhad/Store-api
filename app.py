@@ -1,21 +1,28 @@
+import redis
+import os
+
 from flask import Flask, jsonify
 from flask_smorest import Api
+
+from db import db
+from flask_migrate import Migrate
+
+
 from item import blp as ItemBlueprint
 from store import blp as StoreBlueprint
 from tag import blp as TagBlueprint
 from user import blp as UserBlueprint
-from db import db
-import models
-from flask_jwt_extended import JWTManager, create_access_token
+from rq import Queue
+
+from flask_jwt_extended import JWTManager
 from blocklist import BLOCKLIST
-from flask_migrate import Migrate
 
 
 
 
 app = Flask(__name__)
 jwt = JWTManager(app)
-app.config["JWT_SECRET_KEY"] = "SYED_LEFERY_POKEMON_FUUU_BLACKBUYHADATROUBLEIHAVEWATERMELONINSTEAD"
+app.config["JWT_SECRET_KEY"] = "SYED_CLEFERY_POKEMON_FUUU_BLACKBUYHADATROUBLEIHAVEWATERMELONINSTEAD"
 app.config["PROPAGATE_EXCEPTIONS"] = True
 app.config["API_TITLE"] = "Stores REST API"
 app.config["API_VERSION"] = "v1"
@@ -27,7 +34,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-
+connection = redis.from_url(os.getenv("REDIS_URL"))
+app.queue = Queue(connection=connection)
 api = Api(app)
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -62,8 +70,8 @@ api.register_blueprint(UserBlueprint)
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port=80)
 
 
-
+# 123upstashnuh!@#
 # flask db upgrade docker compose up -d docker compose exec web flask db upgrade
