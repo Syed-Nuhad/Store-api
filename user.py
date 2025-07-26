@@ -36,14 +36,15 @@ def send_email(to_email, subject, body):
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
-        server.login("nuhad7july0@gmail.com", os.getenv("GMAIL_PASSWORD"))
+        server.login("nuhad7july0@gmail.com", "duva valh ttda ffye")
         server.sendmail(msg["From"], msg["To"], msg.as_string())
         server.quit()
         print("✅ Email sent successfully")
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
-def send_registration_email(username, email):
+def send_registration_email( *, username, email):
+    print(f"📧 Sending registration email to: {username}, {email}")
     return send_email(to_email=email, subject="Hi there! You Succesfully signed up.", body=f"Hi {username} you have succesfully registered to stores REST API !")
 
 
@@ -60,7 +61,11 @@ class Register(MethodView):
         db.session.add(user)
         db.session.commit()
 
-        current_app.queue.enqueue(send_registration_email, user.username, user.email, user.password)
+        current_app.queue.enqueue_call(
+            func=send_registration_email,
+            args=(user.username, user.email),
+            queue_name="emails"
+        )
 
 
 

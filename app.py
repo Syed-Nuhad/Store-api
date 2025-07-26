@@ -67,10 +67,10 @@ api.register_blueprint(UserBlueprint)
 
 
 
-
+#font name= Elza Condensed
 
 # 123upstashnuh!@#
 # flask db upgrade docker compose up -d docker compose exec web flask db upgrade
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5080)
+    app.run(host="0.0.0.0", port=5000)
 
