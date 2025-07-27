@@ -68,6 +68,9 @@ api.register_blueprint(UserBlueprint)
 
 
 #font name= Elza Condensed
+#DYGCJ5VUGSLJLENPYUA28T2X
+
+
 
 # 123upstashnuh!@#
 # flask db upgrade docker compose up -d docker compose exec web flask db upgrade
