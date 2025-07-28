@@ -1,4 +1,5 @@
 import os
+from tasks import send_registration_email
 
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
@@ -18,42 +19,8 @@ from sqlalchemy import or_
 from passlib.hash import pbkdf2_sha256
 from schemas import UserSchema, UserRegisterSchema
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 blp = Blueprint("Users", "users", __name__, description="Operations on users")
-
-
-def send_email(to_email, subject, body):
-    msg = MIMEMultipart()
-    msg["From"] = "8d377b001@smtp-brevo.com"  # Brevo sender email
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
-
-    try:
-        server = smtplib.SMTP("smtp-relay.brevo.com", 587)
-        print("✅ Connected to Brevo SMTP")
-        server.starttls()
-        server.login("8d377b001@smtp-brevo.com", "fczTJQD5arNkhHqs")  # Brevo password
-        print("✅ Brevo login successful")
-        server.sendmail(msg["From"], msg["To"], msg.as_string())
-        server.quit()
-        print("✅ Email sent successfully")
-        return True
-    except Exception as e:
-        print(f"❌ Failed to send email: {e}")
-        return False
-
-
-def send_registration_email(*, username, email):
-    print(f"📧 Sending registration email to: {username}, {email}")
-    return send_email(
-        to_email=email,
-        subject="Hi there! You Succesfully signed up.",
-        body=f"Hi {username}, you have successfully registered to the Stores REST API!",
-    )
 
 
 @blp.route("/register")
@@ -75,11 +42,12 @@ class Register(MethodView):
         db.session.commit()
 
         # Enqueue email job correctly with keyword arguments
-        current_app.queue.enqueue_call(
+        job = current_app.queue.enqueue_call(
             func=send_registration_email,
             kwargs={"username": user.username, "email": user.email},
-            queue_name="emails",
         )
+
+        print(f"✅ Job enqueued: {job.id}")
 
         # Generate tokens
         access_token = create_access_token(identity=str(user.id), fresh=True)
@@ -125,3 +93,5 @@ class Logout(MethodView):
         jti = get_jwt()["jti"]
         BLOCKLIST.add(jti)
         return {"message": "User logged out"}, 200
+
+
